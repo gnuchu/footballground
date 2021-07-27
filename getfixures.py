@@ -2,6 +2,7 @@ import yaml
 import requests
 import sys
 import json
+from datetime import date, datetime
 
 def get_config(path):
   with open(path, 'r') as stream:
@@ -12,39 +13,46 @@ def get_config(path):
   
   return config
 
+def format_date(ds):
+  d = datetime.fromisoformat(ds)
+  f = "%Y-%m-%d %H:%M:%S"
 
-config_file='./api.yaml'
+  str = d.strftime(f)
+  return str
+
+config_file='./conf/api.yaml'
 config=get_config(config_file)
 
 season = config['season']
 leagues = config['leagues']
 country = config['country']
+api_key = config['api_key']
+api_host = config['api_host']
+url = config['fixtures_url']
 
-url = "https://api-football-v1.p.rapidapi.com/v3/fixtures"
-api_key = "FsCmAMgX9wmshWzee5mkjIKYDNGup1uXi63jsnaZYcBBNBAg4L"
-api_host = "api-football-v1.p.rapidapi.com"
 headers = {
   'x-rapidapi-key': f"{api_key}",
   'x-rapidapi-host': f"{api_host}"
 }
 
-c = 0
 
+for league in leagues:
+  querystring = {
+    "league": f"{league['id']}",
+    "season": f"{season}"
+  }
 
-with open("fixtures.csv", "w") as f:
-  for league in leagues:
-    querystring = {
-      "league": f"{league['id']}",
-      "season": f"{season}"
-    }
+  response = requests.request("GET", url, headers=headers, params=querystring)
+  j = json.loads(response.text)
+  
+  outputfile = f"output/{league['name']}_fixtures_{season}.csv"
+  f = open(outputfile, "w")
 
-    response = requests.request("GET", url, headers=headers, params=querystring)
-    j = json.loads(response.text)
-    
-    for item in j['response']:
-      c += 1
-      fixture = item['fixture']
-      league = item['league']
-      teams = item['teams']
+  for item in j['response']:
+    fixture = item['fixture']
+    league = item['league']
+    teams = item['teams']
+    date =format_date(fixture['date'])
 
-      f.write(f"{teams['home']['name']},{teams['away']['name']},{league['name']},{fixture['venue']['name']},{fixture['date']}\n")
+    f.write(f"{teams['home']['name']},{teams['away']['name']},{league['name']},{fixture['venue']['name']},{date}\n")
+  f.close()
