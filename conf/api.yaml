@@ -1,0 +1,14 @@
+api_key: FsCmAMgX9wmshWzee5mkjIKYDNGup1uXi63jsnaZYcBBNBAg4L
+api_host: api-football-v1.p.rapidapi.com
+fixtures_url: https://api-football-v1.p.rapidapi.com/v3/fixtures
+country: 127
+season: 2021
+leagues:
+  - name: "League 1"
+    id: 183
+  - name: "League 2"
+    id: 184
+  - name: "Championship"
+    id: 180
+  - name: "Premiership"
+    id: 179
